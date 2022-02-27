@@ -1,51 +1,35 @@
 const http = require('http');
 const { v4: uuidv4 } = require('uuid');
+const HttpMethod = require('./HttpFun');
 
 const todos = [
   {
-    title: 'today',
+    title: '預設待辦事項',
     id: uuidv4(),
   },
 ];
 
 const RequestListen = (req, res) => {
-  const headers = {
-    'Access-Control-Allow-Headers':
-      'Content-Type, Authorization, Content-Length, X-Requested-With',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'PATCH, POST, GET,OPTIONS,DELETE',
-    'Content-Type': 'application/json',
-  };
 
   let body = '';
-
   req.on('data', (chunk) => {
     body += chunk;
   });
+
+  // -------------------------------------------------
   // GET 取得全部代辦事項
   if (req.url == '/todos' && req.method == 'GET') {
-    res.writeHeader(200, headers);
-    res.write(
-      JSON.stringify({
-        status: 'success',
-        data: todos,
-      })
-    );
-    res.end();
+    HttpMethod(res, 200, 'success', todos,'成功取得清單');
   }
+
+  // -------------------------------------------------
   // POST 新增代辦事項
   else if (req.url == '/todos' && req.method == 'POST') {
     req.on('end', () => {
       try {
         const title = JSON.parse(body).title;
         if (title == undefined) {
-          res.writeHeader(404, headers);
-          res.write(
-            JSON.stringify({
-              status: 'false',
-              message: 'key值 title 未定義',
-            })
-          );
+          HttpMethod(res, 404, 'false', todos, 'key值 title 未定義');
           return;
         }
 
@@ -54,28 +38,15 @@ const RequestListen = (req, res) => {
           id: uuidv4(),
         };
         todos.push(todo);
-        res.writeHeader(200, headers);
-        res.write(
-          JSON.stringify({
-            status: 'success post',
-            data: todos,
-          })
-        );
-        // res.end();
+        HttpMethod(res, 200, 'success', todos,'新增成功');
       } catch {
-        res.writeHeader(404, headers);
-        res.write(
-          JSON.stringify({
-            status: 'false',
-            message: '非JSON格式',
-          })
-        );
-        // res.end();
+        HttpMethod(res, 404, 'false', todos, '非JSON格式');
       } finally {
-        res.end();
       }
     });
   }
+
+  // -------------------------------------------------
   // PATCH 更改某比代辦事項
   else if (req.url.startsWith('/todos/') && req.method == 'PATCH') {
     req.on('end', () => {
@@ -85,107 +56,55 @@ const RequestListen = (req, res) => {
         const index = todos.findIndex((ind) => ind.id == id);
 
         if (title == undefined) {
-          res.writeHeader(404, headers);
-          res.write(
-            JSON.stringify({
-              status: 'false',
-              message: '鍵值 title 未定義',
-            })
-          );
-          res.end();
+          HttpMethod(res, 404, 'false', todos, '鍵值 title 未定義');
           return;
-        }
-        else if(index == -1){
-            res.writeHeader(404, headers);
-            res.write(
-              JSON.stringify({
-                status: 'false',
-                message: '無符合的資料',
-              })
-            );
-            res.end();
-            return;
+        } else if (index == -1) {
+          HttpMethod(res, 404, 'false', todos, '找無此筆資料');
+          return;
         }
 
         todos[index].title = title;
-        res.writeHeader(200, headers);
-        res.write(
-          JSON.stringify({
-            status: 'success',
-            data: todos,
-            message: `已更新 id : ${id} 的資料`,
-          })
-        );
-        res.end();
+        HttpMethod(res, 200, 'success', todos,'更新成功');
       } catch {
-        res.writeHeader(404, headers);
-        res.write(
-          JSON.stringify({
-            status: 'false',
-            message: '非JSON格式',
-          })
-        );
-        res.end();
+        HttpMethod(res, 404, 'false', todos, '非JSON格式');
       }
     });
-  } 
+  }
+
+  // -------------------------------------------------
   // DELETE 刪除全部代辦事項
   else if (req.url == '/todos' && req.method == 'DELETE') {
     todos.length = 0;
-    res.writeHeader(200, headers);
-    res.write(
-      JSON.stringify({
-        status: 'success',
-        data: todos,
-        message: '已刪除全部資料',
-      })
-    );
-    res.end();
+    HttpMethod(res, 200, 'success', todos,'已刪除全部資料');
   }
+
+  // -------------------------------------------------
   // DELETE 刪除單筆代辦事項
   else if (req.url.startsWith('/todos/') && req.method == 'DELETE') {
     const id = req.url.split('/').pop();
     const index = todos.findIndex((ind) => ind.id == id);
 
     if (index == -1) {
-      res.writeHeader(404, headers);
-      res.write(
-        JSON.stringify({
-          status: 'false',
-          message: '無符合的資料',
-        })
-      );
-      res.end();
+      HttpMethod(res, 404, 'false', todos, '找無此筆資料');
       return;
     }
 
     todos.splice(index, 1);
 
-    res.writeHeader(200, headers);
-    res.write(
-      JSON.stringify({
-        status: 'success',
-        data: todos,
-        message: `已刪除 id : ${id} 的資料`,
-      })
-    );
-    res.end();
+    HttpMethod(res, 200, 'success', todos,'已刪除此筆資料');
   }
+
+  // -------------------------------------------------
   // OPTIONS 確認跨網域是否有問題
   else if (req.method == 'OPTIONS') {
     res.writeHeader(200, headers);
     res.end();
-  } 
+  }
+
+  // -------------------------------------------------
   // 路由名稱錯誤
   else {
-    res.writeHeader(404, headers);
-    res.write(
-      JSON.stringify({
-        status: 'false',
-        message: '路由錯誤,請加上/todos路由',
-      })
-    );
-    res.end();
+    HttpMethod(res, 404, 'false', todos,'路由錯誤,請加上/todos路由');
   }
 };
 
