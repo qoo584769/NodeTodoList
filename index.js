@@ -166,7 +166,7 @@ const RequestListen = (req, res) => {
       JSON.stringify({
         status: 'success',
         data: todos,
-        message: '已刪除 id : ${id} 的資料',
+        message: `已刪除 id : ${id} 的資料`,
       })
     );
     res.end();
