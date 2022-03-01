@@ -24,7 +24,7 @@ const RequestListen = (req, res) => {
         HttpMethod(res, 200, 'success', todos, '成功取得清單');
         break;
       // -------------------------------------------------
-      // POST 新增代辦事項
+      // POST 新增代辦事項  格式為{data:[{'title':'資料1'},{'title':'資料2'}]}
       case 'POST':
         req.on('end', () => {
           try {
