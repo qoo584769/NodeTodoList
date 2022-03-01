@@ -1,7 +1,6 @@
 const http = require('http');
 const { v4: uuidv4 } = require('uuid');
 const HttpMethod = require('./HttpFun');
-const ErrorMethod = require('./ErrorFun');
 
 let todos = [
   {
