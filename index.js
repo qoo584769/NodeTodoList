@@ -71,7 +71,6 @@ const RequestListen = (req, res) => {
             const title = JSON.parse(body).title;
             const id = req.url.split('/').pop();
             const index = todos.findIndex((ind) => ind.id == id);
-
             if (title == undefined) {
               HttpMethod(res, 404, 'false', todos, '鍵值 title 未定義');
               return;
@@ -217,4 +216,5 @@ const RequestListen = (req, res) => {
 };
 
 const server = http.createServer(RequestListen);
-server.listen(process.env.PORT || 8080);
+const port = process.env.PORT || 8080;
+server.listen(port);
