@@ -6,6 +6,7 @@ let todos = [
   {
     title: '預設待辦事項',
     id: uuidv4(),
+    deleted:false,
   },
 ];
 
@@ -36,6 +37,7 @@ const RequestListen = (req, res) => {
                 const todo = {
                   title: val.title,
                   id: uuidv4(),
+                  deleted:false
                 };
                 NewData.push(todo);
                 return;
@@ -89,7 +91,6 @@ const RequestListen = (req, res) => {
       // DELETE 刪除單筆/全部代辦事項
       case 'DELETE':
         const id = req.url.split('/').pop();
-
         if (id !== 'todos') {
           const index = todos.findIndex((ind) => ind.id == id);
 
