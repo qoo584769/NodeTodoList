@@ -1,12 +1,19 @@
 const http = require('http');
 const { v4: uuidv4 } = require('uuid');
 const HttpMethod = require('./HttpFun');
+const {
+  InsertMany,
+  FindOne,
+  UpdateOne,
+  DeleteOne,
+  DeleteMany,
+} = require('./repository/mongodb');
 
 let todos = [
   {
     title: '預設待辦事項',
     id: uuidv4(),
-    deleted:false,
+    deleted: false,
   },
 ];
 
@@ -23,7 +30,12 @@ const RequestListen = (req, res) => {
       // GET 取得全部代辦事項
       case 'GET':
         HttpMethod(res, 200, 'success', todos, '成功取得清單');
+
+        // 從資料庫取得資料
+        FindOne();
+
         break;
+
       // -------------------------------------------------
       // POST 新增代辦事項  格式為{data:[{'title':'資料1'},{'title':'資料2'}]}
       case 'POST':
@@ -35,9 +47,9 @@ const RequestListen = (req, res) => {
             data.forEach((val, ind) => {
               if (val.title !== undefined) {
                 const todo = {
-                  title: val.title,
                   id: uuidv4(),
-                  deleted:false
+                  title: val.title,
+                  deleted: false,
                 };
                 NewData.push(todo);
                 return;
@@ -46,6 +58,10 @@ const RequestListen = (req, res) => {
             });
 
             todos = todos.concat(NewData);
+
+            // 新增資料到資料庫
+            InsertMany(todos);
+
             HttpMethod(
               res,
               200,
@@ -63,8 +79,10 @@ const RequestListen = (req, res) => {
           }
         });
         break;
+
       // -------------------------------------------------
       // PATCH 更改某比代辦事項
+
       case 'PATCH':
         req.on('end', () => {
           try {
@@ -79,6 +97,9 @@ const RequestListen = (req, res) => {
               return;
             }
 
+            // 更新一筆資料到資料庫
+            UpdateOne(id, title);
+
             todos[index].title = title;
             HttpMethod(res, 200, 'success', todos, `已更新 id : ${id} 資料`);
           } catch {
@@ -86,6 +107,7 @@ const RequestListen = (req, res) => {
           }
         });
         break;
+
       // -------------------------------------------------
       // DELETE 刪除單筆/全部代辦事項
       case 'DELETE':
@@ -98,15 +120,20 @@ const RequestListen = (req, res) => {
             return;
           }
 
+          // 從資料庫刪除一筆資料
+          DeleteOne(id);
           todos.splice(index, 1);
 
           HttpMethod(res, 200, 'success', todos, `已刪除 id : ${id} 資料`);
         } else {
           todos.length = 0;
 
+          // 刪除資料庫全部資料
+          DeleteMany();
           HttpMethod(res, 200, 'success', todos, '已刪除全部資料');
         }
         break;
+
       // -------------------------------------------------
       // OPTIONS 確認跨網域是否有問題
       case 'OPTIONS':
@@ -117,7 +144,7 @@ const RequestListen = (req, res) => {
       default:
         break;
     }
-  } 
+  }
   // -------------------------------------------------
   // 路由名稱錯誤
   else {
