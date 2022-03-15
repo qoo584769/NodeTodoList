@@ -4,7 +4,7 @@ const uri = process.env.MONGO_DB_CONNECTING_STRING;
 const client = new MongoClient(uri);
 
 const HttpMethod = require('../HttpFun');
-
+let GetResult = [];
 // -----------------------------------------------------------
 // 查詢單一資料
 async function FindOne() {
@@ -178,11 +178,11 @@ async function DeleteMany(res, HttpCode, status, data, message) {
 
 // DeleteMany().catch(console.dir);
 
-module.exports = {
+module.exports = {  
   InsertOne,
   InsertMany,
   FindOne,
-  FindMany,
+  // FindMany,
   UpdateOne,
   DeleteOne,
   DeleteMany,

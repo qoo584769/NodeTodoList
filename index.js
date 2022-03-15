@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const HttpMethod = require('./HttpFun');
 const {
   InsertMany,
-  FindMany,
+  // FindMany,
   UpdateOne,
   DeleteOne,
   DeleteMany,
@@ -23,9 +23,39 @@ const RequestListen = (req, res) => {
       // -------------------------------------------------
       // GET 取得全部代辦事項
       case 'GET':
+        
+        // todos存在記憶體 伺服器重啟會不見 造成資料庫有資料可是卻無法更新刪除
+        const { MongoClient } = require('mongodb');
+        const uri = process.env.MONGO_DB_CONNECTING_STRING;
+        const client = new MongoClient(uri);
+
+        async function FindMany(res, HttpCode, status, message) {
+          try {
+            await client.connect();
+
+            const database = client.db('todolist');
+
+            const todoss = database.collection('todos');
+
+            const query = {};
+
+            const options = {
+              sort: { title: 1 },
+
+              projection: { _id: 0 },
+            };
+
+            const cursor = await todoss.find(query, options).toArray();
+
+            HttpMethod(res, HttpCode, status, cursor, message);
+            todos = cursor;
+          } finally {
+            await client.close();
+          }
+        }
 
         // 從資料庫取得資料
-        const result =FindMany(res, 200, 'success', '成功取得清單');
+        FindMany(res, 200, 'success', '成功取得清單');
 
         break;
 
@@ -53,8 +83,13 @@ const RequestListen = (req, res) => {
             todos = todos.concat(NewData);
 
             // 新增資料到資料庫
-            InsertMany(res, 200, 'success', todos, `新增 ${NewData.length} 筆資料成功`);
-
+            InsertMany(
+              res,
+              200,
+              'success',
+              todos,
+              `新增 ${NewData.length} 筆資料成功`
+            );
           } catch (err) {
             if (err instanceof SyntaxError) {
               HttpMethod(res, 404, 'false', todos, '非JSON格式');
@@ -82,12 +117,19 @@ const RequestListen = (req, res) => {
               HttpMethod(res, 404, 'false', todos, '找無此筆資料');
               return;
             }
-            
+
             todos[index].title = title;
 
             // 更新一筆資料到資料庫
-            UpdateOne(res, 200, 'success', todos, `已更新 id : ${id} 資料`,id, title);
-
+            UpdateOne(
+              res,
+              200,
+              'success',
+              todos,
+              `已更新 id : ${id} 資料`,
+              id,
+              title
+            );
           } catch {
             HttpMethod(res, 404, 'false', todos, '非JSON格式');
           }
@@ -105,12 +147,11 @@ const RequestListen = (req, res) => {
             HttpMethod(res, 404, 'false', todos, '找無此筆資料');
             return;
           }
-        
+
           todos.splice(index, 1);
 
           // 從資料庫刪除一筆資料
-          DeleteOne(res, 200, 'success', todos, `已刪除 id : ${id} 資料`,id);
-          
+          DeleteOne(res, 200, 'success', todos, `已刪除 id : ${id} 資料`, id);
         } else {
           todos.length = 0;
 
