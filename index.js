@@ -3,19 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 const HttpMethod = require('./HttpFun');
 const {
   InsertMany,
-  FindOne,
+  FindMany,
   UpdateOne,
   DeleteOne,
   DeleteMany,
 } = require('./repository/mongodb');
 
-let todos = [
-  {
-    title: '預設待辦事項',
-    id: uuidv4(),
-    deleted: false,
-  },
-];
+let todos = [];
 
 const RequestListen = (req, res) => {
   let body = '';
@@ -29,10 +23,9 @@ const RequestListen = (req, res) => {
       // -------------------------------------------------
       // GET 取得全部代辦事項
       case 'GET':
-        HttpMethod(res, 200, 'success', todos, '成功取得清單');
 
         // 從資料庫取得資料
-        FindOne();
+        const result =FindMany(res, 200, 'success', '成功取得清單');
 
         break;
 
@@ -60,15 +53,8 @@ const RequestListen = (req, res) => {
             todos = todos.concat(NewData);
 
             // 新增資料到資料庫
-            InsertMany(todos);
+            InsertMany(res, 200, 'success', todos, `新增 ${NewData.length} 筆資料成功`);
 
-            HttpMethod(
-              res,
-              200,
-              'success',
-              todos,
-              `新增 ${NewData.length} 筆資料成功`
-            );
           } catch (err) {
             if (err instanceof SyntaxError) {
               HttpMethod(res, 404, 'false', todos, '非JSON格式');
@@ -96,12 +82,12 @@ const RequestListen = (req, res) => {
               HttpMethod(res, 404, 'false', todos, '找無此筆資料');
               return;
             }
+            
+            todos[index].title = title;
 
             // 更新一筆資料到資料庫
-            UpdateOne(id, title);
+            UpdateOne(res, 200, 'success', todos, `已更新 id : ${id} 資料`,id, title);
 
-            todos[index].title = title;
-            HttpMethod(res, 200, 'success', todos, `已更新 id : ${id} 資料`);
           } catch {
             HttpMethod(res, 404, 'false', todos, '非JSON格式');
           }
@@ -119,18 +105,17 @@ const RequestListen = (req, res) => {
             HttpMethod(res, 404, 'false', todos, '找無此筆資料');
             return;
           }
-
-          // 從資料庫刪除一筆資料
-          DeleteOne(id);
+        
           todos.splice(index, 1);
 
-          HttpMethod(res, 200, 'success', todos, `已刪除 id : ${id} 資料`);
+          // 從資料庫刪除一筆資料
+          DeleteOne(res, 200, 'success', todos, `已刪除 id : ${id} 資料`,id);
+          
         } else {
           todos.length = 0;
 
           // 刪除資料庫全部資料
-          DeleteMany();
-          HttpMethod(res, 200, 'success', todos, '已刪除全部資料');
+          DeleteMany(res, 200, 'success', todos, '已刪除全部資料');
         }
         break;
 
