@@ -1,8 +1,6 @@
 // require('dotenv').config();
 const { MongoClient } = require('mongodb');
-const uri =
-  process.env.MONGO_DB_CONNECTING_STRING ||
-  'mongodb+srv://admin:admin@cluster0.ovlyd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+const uri = process.env.MONGO_DB_CONNECTING_STRING;
 const client = new MongoClient(uri);
 
 const HttpMethod = require('../HttpFun');
