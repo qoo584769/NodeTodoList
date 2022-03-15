@@ -19,7 +19,7 @@ async function FindOne() {
     await client.close();
   }
 }
-FindOne().catch(console.dir);
+// FindOne().catch(console.dir);
 
 // -----------------------------------------------------------
 // 新增單一資料
@@ -36,7 +36,7 @@ async function InsertOne(data) {
     await client.close();
   }
 }
-InsertOne().catch(console.dir);
+// InsertOne().catch(console.dir);
 
 // -----------------------------------------------------------
 // 新增多筆資料
@@ -58,7 +58,7 @@ async function InsertMany(data) {
   }
 }
 
-InsertMany().catch(console.dir);
+// InsertMany().catch(console.dir);
 
 // -----------------------------------------------------------
 // 修改單一資料
@@ -89,7 +89,7 @@ async function UpdateOne(id, title) {
     await client.close();
   }
 }
-UpdateOne().catch(console.dir);
+// UpdateOne().catch(console.dir);
 
 // -----------------------------------------------------------
 // 刪除單一資料
@@ -115,7 +115,7 @@ async function DeleteOne(id) {
   }
 }
 
-DeleteOne().catch(console.dir);
+// DeleteOne().catch(console.dir);
 
 // -----------------------------------------------------------
 // 刪除全部資料
@@ -135,7 +135,7 @@ async function DeleteMany() {
   }
 }
 
-DeleteMany().catch(console.dir);
+// DeleteMany().catch(console.dir);
 
 module.exports = {
   InsertOne,
