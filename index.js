@@ -8,22 +8,73 @@ const {
   DeleteOne,
   DeleteMany,
 } = require('./repository/mongodb');
+const { DbClient } = require('./repository/connection_db');
+const { postRegister,login,patchUpdate,postDelete } = require('./controller/momber_controller');
 
 let todos = [];
 
-const RequestListen = (req, res) => {
+const RequestListen = (req, res, next) => {
   let body = '';
   req.on('data', (chunk) => {
     body += chunk;
   });
   // -------------------------------------------------
+  // 取得會員
+  if (req.url.startsWith('/getuser')) {
+    switch (req.method) {
+      case 'GET':
+        DbClient();
+        break;
+
+      default:
+        break;
+    }
+  }
+  // 註冊會員
+  else if (req.url.startsWith('/signup')) {
+    switch (req.method) {
+      case 'POST':
+        req.on('end', () => {
+          const data = JSON.parse(body);
+          // 呼叫控制器註冊會員函式
+          postRegister(req, res, next, data);
+        });
+        break;
+
+      default:
+        break;
+    }
+  }
+  // 會員登入
+  else if (req.url.startsWith('/login')) {
+    req.on('end', () => {
+      const data = JSON.parse(body);
+      login(req, res, next,data);
+    });
+  }
+  // 會員編輯
+  else if(req.url.startsWith('/update')){
+    req.on('end',()=>{
+      const data = JSON.parse(body);
+      patchUpdate(req,res,next,data);
+    });
+  }
+  // 會員刪除
+  else if(req.url.startsWith('/delete')){
+    req.on('end',()=>{
+      const data = JSON.parse(body);
+      postDelete(req,res,next,data);
+    });
+  }
+
+
+  // -------------------------------------------------
   // 路由名稱正確
-  if (req.url.startsWith('/todos/') || req.url == '/todos') {
+  else if (req.url.startsWith('/todos/') || req.url == '/todos') {
     switch (req.method) {
       // -------------------------------------------------
       // GET 取得全部代辦事項
       case 'GET':
-        
         // todos存在記憶體 伺服器重啟會不見 造成資料庫有資料可是卻無法更新刪除
         const { MongoClient } = require('mongodb');
         const uri = process.env.MONGO_DB_CONNECTING_STRING;
@@ -56,7 +107,7 @@ const RequestListen = (req, res) => {
 
         // 從資料庫取得資料
         FindMany(res, 200, 'success', '成功取得清單');
-
+        // pg_db();
         break;
 
       // -------------------------------------------------

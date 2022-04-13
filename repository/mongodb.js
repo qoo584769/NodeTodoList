@@ -1,6 +1,7 @@
-// require('dotenv').config();
+require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const uri = process.env.MONGO_DB_CONNECTING_STRING;
+// const uri = "mongodb+srv://admin:admin@cluster0.ovlyd.mongodb.net/test?authSource=admin&replicaSet=atlas-hv5mq1-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
 const client = new MongoClient(uri);
 
 const HttpMethod = require('../HttpFun');

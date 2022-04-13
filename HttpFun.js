@@ -17,6 +17,7 @@ function HttpMethod(res, HttpCode, status, data, message) {
         message:message
       })
     );
+    res.end();
   }
   else if(HttpCode == 404){
     res.write(
@@ -25,8 +26,8 @@ function HttpMethod(res, HttpCode, status, data, message) {
           message: message,
         })
       );
+      res.end();
   }
-  res.end();
 }
 
 module.exports = HttpMethod;
